@@ -7,13 +7,13 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
-import com.ismail.kingdom.AdsController
+import com.ismail.kingdom.ads.AdsInterface
+import com.ismail.kingdom.ads.RewardedAdType
 
-// Android AdMob implementation of AdsController
-class AndroidAdsController(private val activity: Activity) : AdsController {
+// Android AdMob implementation of AdsInterface
+class AndroidAdsController(private val activity: Activity) : AdsInterface {
 
     private var rewardedAd: RewardedAd? = null
-    private var pendingReward: (() -> Unit)? = null
 
     // AdMob test unit ID — replace with real ID before release
     private val AD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917"
@@ -24,25 +24,34 @@ class AndroidAdsController(private val activity: Activity) : AdsController {
         loadRewardedAd()
     }
 
-    // Returns true when a rewarded ad is loaded and ready
-    override fun isRewardedAdReady(): Boolean = rewardedAd != null
-
-    // Shows the rewarded ad if ready; stores callback for when reward is granted
-    override fun showRewardedAd(onRewarded: () -> Unit) {
-        val ad = rewardedAd ?: return
-        pendingReward = onRewarded
+    // Shows a rewarded ad of the specified type
+    override fun showRewardedAd(type: RewardedAdType, onRewarded: (RewardedAdType) -> Unit, onFailed: () -> Unit) {
+        val ad = rewardedAd ?: run { onFailed(); return }
         activity.runOnUiThread {
             ad.show(activity) { _ ->
-                pendingReward?.invoke()
-                pendingReward = null
+                onRewarded(type)
                 rewardedAd = null
                 loadRewardedAd()
             }
         }
     }
 
+    // Shows an interstitial ad (full-screen)
+    override fun showInterstitialAd(onComplete: () -> Unit) {
+        onComplete()
+    }
+
+    // Shows or hides banner ad
+    override fun showBannerAd(show: Boolean) {}
+
+    // Checks if a rewarded ad is ready to show
+    override fun isAdReady(type: RewardedAdType): Boolean = rewardedAd != null
+
+    // Checks if interstitial ad is ready
+    override fun isInterstitialReady(): Boolean = false
+
     // Loads the next rewarded ad from AdMob
-    override fun loadRewardedAd() {
+    private fun loadRewardedAd() {
         val request = AdRequest.Builder().build()
         RewardedAd.load(activity, AD_UNIT_ID, request, object : RewardedAdLoadCallback() {
             override fun onAdLoaded(ad: RewardedAd) { rewardedAd = ad }

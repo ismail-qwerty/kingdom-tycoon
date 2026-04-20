@@ -1,12 +1,12 @@
 // PATH: core/src/main/java/com/ismail/kingdom/assets/GameAssets.kt
 package com.ismail.kingdom.assets
-
+ 
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-
+ 
 // Singleton wrapper for LibGDX AssetManager
 object GameAssets {
     
@@ -171,19 +171,20 @@ object GameAssets {
         }
     }
     
-    // Gets a texture region from atlas
+    // Gets a texture region from atlas; returns a 1x1 placeholder region if atlas is unavailable
     fun getTextureRegion(name: String): TextureRegion {
-        if (textureAtlas == null) {
+        if (textureAtlas == null && assetManager.isLoaded(AssetDescriptors.TEXTURE_ATLAS)) {
             textureAtlas = assetManager.get(AssetDescriptors.TEXTURE_ATLAS, TextureAtlas::class.java)
         }
-        return textureAtlas!!.findRegion(name)
+        val atlas = textureAtlas ?: return TextureRegion(getPlaceholderTexture(com.badlogic.gdx.graphics.Color.DARK_GRAY))
+        return atlas.findRegion(name) ?: TextureRegion(getPlaceholderTexture(com.badlogic.gdx.graphics.Color.MAGENTA))
     }
     
     // Gets a bitmap font
     fun getBitmapFont(path: String): BitmapFont {
         return assetManager.get(path, BitmapFont::class.java)
     }
-
+ 
     // Gets era background texture by era ID
     fun getEraBackground(eraId: Int): Texture {
         val path = when (eraId) {
@@ -197,16 +198,16 @@ object GameAssets {
         return if (assetManager.isLoaded(path)) assetManager.get(path, Texture::class.java)
         else getPlaceholderTexture(com.badlogic.gdx.graphics.Color.DARK_GRAY)
     }
-
+ 
     // Gets building texture by building ID
     fun getBuildingTexture(buildingId: String): Texture = getPlaceholderTexture(com.badlogic.gdx.graphics.Color.BROWN)
-
+ 
     // Gets advisor portrait by advisor ID
     fun getAdvisorPortrait(advisorId: String): Texture = getPlaceholderTexture(com.badlogic.gdx.graphics.Color.BLUE)
-
+ 
     // Gets hero portrait by hero ID
     fun getHeroPortrait(heroId: String): Texture = getPlaceholderTexture(com.badlogic.gdx.graphics.Color.GOLD)
-
+ 
     // Creates placeholder texture with specified color
     private fun getPlaceholderTexture(color: com.badlogic.gdx.graphics.Color): Texture {
         val pm = com.badlogic.gdx.graphics.Pixmap(64, 64, com.badlogic.gdx.graphics.Pixmap.Format.RGBA8888)

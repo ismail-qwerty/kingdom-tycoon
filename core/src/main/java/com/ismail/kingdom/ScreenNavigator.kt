@@ -1,6 +1,6 @@
 // PATH: core/src/main/java/com/ismail/kingdom/ScreenNavigator.kt
 package com.ismail.kingdom
-
+ 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Pixmap
@@ -13,7 +13,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport
 import ktx.app.KtxGame
 import ktx.app.KtxScreen
 import java.util.*
-
+ 
 /**
  * NAVIGATION FLOW DOCUMENTATION
  * =============================
@@ -54,7 +54,7 @@ import java.util.*
  * - Stage, Skin, Textures created by screen must be disposed
  * - Shared resources (GameAssets) should NOT be disposed by screens
  */
-
+ 
 enum class ScreenType {
     LOADING,
     MAIN_MENU,
@@ -64,7 +64,7 @@ enum class ScreenType {
     PRESTIGE,
     SETTINGS
 }
-
+ 
 enum class TransitionType {
     FADE,
     SLIDE_LEFT,
@@ -72,32 +72,32 @@ enum class TransitionType {
     FLASH_WHITE,
     NONE
 }
-
+ 
 object ScreenNavigator {
-
+ 
     private var game: KingdomTycoonGame? = null
     private val screenStack = Stack<ScreenType>()
-
+ 
     private var transitionStage: Stage? = null
     private var isTransitioning = false
-
+ 
     fun initialize(game: KingdomTycoonGame) {
         this.game = game
         screenStack.clear()
         transitionStage = Stage(ScreenViewport())
     }
-
+ 
     fun navigate(screenType: ScreenType, transition: TransitionType = TransitionType.FADE, addToStack: Boolean = true) {
         if (game == null) {
             Gdx.app.error("ScreenNavigator", "Navigator not initialized!")
             return
         }
-
+ 
         if (isTransitioning) {
             Gdx.app.log("ScreenNavigator", "Transition already in progress, ignoring")
             return
         }
-
+ 
         if (addToStack && screenStack.isNotEmpty()) {
             if (screenStack.peek() != screenType) {
                 screenStack.push(screenType)
@@ -105,9 +105,9 @@ object ScreenNavigator {
         } else if (addToStack) {
             screenStack.push(screenType)
         }
-
+ 
         Gdx.app.log("ScreenNavigator", "Navigating to $screenType with $transition transition")
-
+ 
         when (transition) {
             TransitionType.FADE -> fadeTransition(screenType)
             TransitionType.SLIDE_LEFT -> slideTransition(screenType, true)
@@ -116,7 +116,7 @@ object ScreenNavigator {
             TransitionType.NONE -> instantTransition(screenType)
         }
     }
-
+ 
     fun goBack(): Boolean {
         if (screenStack.size <= 1) {
             Gdx.app.log("ScreenNavigator", "No screen to go back to")
@@ -128,12 +128,12 @@ object ScreenNavigator {
         navigate(previousScreen, TransitionType.FADE, addToStack = false)
         return true
     }
-
+ 
     fun clearStack() {
         screenStack.clear()
         Gdx.app.log("ScreenNavigator", "Screen stack cleared")
     }
-
+ 
     private fun fadeTransition(screenType: ScreenType) {
         isTransitioning = true
         val overlay = createOverlay(Color.BLACK)
@@ -151,7 +151,7 @@ object ScreenNavigator {
             )
         )
     }
-
+ 
     private fun slideTransition(screenType: ScreenType, slideLeft: Boolean) {
         isTransitioning = true
         val overlay = createOverlay(Color.BLACK)
@@ -170,7 +170,7 @@ object ScreenNavigator {
             )
         )
     }
-
+ 
     private fun flashTransition(screenType: ScreenType) {
         isTransitioning = true
         val overlay = createOverlay(Color.WHITE)
@@ -189,18 +189,18 @@ object ScreenNavigator {
             )
         )
     }
-
+ 
     private fun instantTransition(screenType: ScreenType) {
         setScreen(screenType)
     }
-
+ 
     // FIX: Always remove the old screen instance before adding a new one.
     // KtxGame throws GdxRuntimeException if you addScreen() with a type
     // that is already registered. removeScreen() disposes and unregisters it.
     private fun setScreen(screenType: ScreenType) {
         val g = game ?: return
         val newScreen = createScreen(screenType) ?: return
-
+ 
         // Remove existing instance of this screen type to avoid duplicate registration
         try {
             when (newScreen) {
@@ -216,9 +216,9 @@ object ScreenNavigator {
         } catch (e: Exception) {
             // Screen wasn't registered yet — safe to ignore
         }
-
+ 
         g.addScreen(newScreen)
-
+ 
         when (newScreen) {
             is LoadingScreen -> g.setScreen<LoadingScreen>()
             is MainMenuScreen -> g.setScreen<MainMenuScreen>()
@@ -230,7 +230,7 @@ object ScreenNavigator {
             else -> Gdx.app.error("ScreenNavigator", "Unknown screen type: ${newScreen::class.simpleName}")
         }
     }
-
+ 
     private fun createScreen(screenType: ScreenType): KtxScreen? {
         val g = game ?: return null
         return when (screenType) {
@@ -241,41 +241,46 @@ object ScreenNavigator {
             ScreenType.EVENT -> EventScreen(g)
             ScreenType.PRESTIGE -> {
                 val layer = g.gameEngine.prestigeSystem.getAvailablePrestigeLayer()
-                if (layer != null) {
+                if (layer != com.ismail.kingdom.models.PrestigeLayer.NONE) {
                     PrestigeScreen(g, layer)
                 } else {
-                    Gdx.app.error("ScreenNavigator", "No prestige layer available")
+                    Gdx.app.error("ScreenNavigator", "No prestige layer available yet")
                     null
                 }
             }
             ScreenType.SETTINGS -> SettingsScreen(g)
         }
     }
-
+ 
+    private val overlayTextures = mutableListOf<Texture>()
+ 
     private fun createOverlay(color: Color): Image {
         val pixmap = Pixmap(Gdx.graphics.width, Gdx.graphics.height, Pixmap.Format.RGBA8888)
         pixmap.setColor(color)
         pixmap.fill()
         val texture = Texture(pixmap)
         pixmap.dispose()
+        overlayTextures.add(texture)
         return Image(texture)
     }
-
+ 
     fun update(delta: Float) {
         transitionStage?.act(delta)
     }
-
+ 
     fun render() {
         transitionStage?.draw()
     }
-
+ 
     fun dispose() {
         transitionStage?.dispose()
         transitionStage = null
+        overlayTextures.forEach { it.dispose() }
+        overlayTextures.clear()
     }
-
+ 
     fun isTransitioning(): Boolean = isTransitioning
-
+ 
     fun getCurrentScreen(): ScreenType? {
         return if (screenStack.isNotEmpty()) screenStack.peek() else null
     }

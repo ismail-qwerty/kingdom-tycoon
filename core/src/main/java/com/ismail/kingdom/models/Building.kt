@@ -1,9 +1,9 @@
 // PATH: core/src/main/java/com/ismail/kingdom/models/Building.kt
 package com.ismail.kingdom.models
-
+ 
 import kotlinx.serialization.Serializable
 import kotlin.math.pow
-
+ 
 // Building model with income calculation
 @Serializable
 data class Building(
@@ -36,7 +36,4 @@ data class Building(
         val r = COST_GROWTH_RATE
         return baseCost * (r.pow(count.toDouble()) * (r.pow(quantity.toDouble()) - 1.0) / (r - 1.0))
     }
-
-    val values: List<String> get() = listOf(id)
-    val keys: List<String> get() = listOf(id)
 }

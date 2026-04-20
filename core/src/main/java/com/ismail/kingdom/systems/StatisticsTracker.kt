@@ -1,9 +1,9 @@
 // PATH: core/src/main/java/com/ismail/kingdom/systems/StatisticsTracker.kt
 package com.ismail.kingdom.systems
-
+ 
 import com.ismail.kingdom.models.GameState
 import com.ismail.kingdom.models.Building
-
+ 
 // Tracks all lifetime statistics for the player
 data class Statistics(
     var totalGoldEarned: Double = 0.0,
@@ -21,15 +21,23 @@ data class Statistics(
     var currentSessionStart: Long = System.currentTimeMillis(),
     val buildingPurchaseCounts: MutableMap<String, Int> = mutableMapOf()
 )
-
+ 
 // Manages tracking of all game statistics
 class StatisticsTracker(private val gameState: GameState) {
     
     val stats = Statistics()
     
+    private var playtimeAccumulator: Float = 0f
+ 
     // Updates playtime and dynamic stats
     fun update(delta: Float) {
-        stats.totalPlaytimeSeconds += delta.toLong()
+        // Accumulate fractional seconds; only increment whole seconds to avoid delta.toLong() == 0 bug
+        playtimeAccumulator += delta
+        val wholeSeconds = playtimeAccumulator.toLong()
+        if (wholeSeconds > 0) {
+            stats.totalPlaytimeSeconds += wholeSeconds
+            playtimeAccumulator -= wholeSeconds.toFloat()
+        }
         
         // Update highest IPS
         val currentIPS = calculateCurrentIPS()
