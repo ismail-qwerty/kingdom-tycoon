@@ -1,0 +1,8 @@
+# Placeholder texture atlas
+# This is a minimal atlas file for placeholder assets
+
+textures.png
+size: 1024,1024
+format: RGBA8888
+filter: Linear,Linear
+repeat: none

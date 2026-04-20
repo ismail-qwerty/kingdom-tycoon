@@ -1,0 +1,44 @@
+apply plugin: 'kotlin'
+apply plugin: 'kotlinx-serialization'
+
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+  kotlinOptions.jvmTarget = '17'
+}
+
+eclipse.project.name = appName + '-core'
+
+sourceSets {
+  main {
+    java.srcDirs = ['src/main/java', 'src/main/kotlin']
+  }
+}
+
+dependencies {
+  api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+  api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+  api "com.badlogicgames.gdx:gdx:$gdxVersion"
+
+  // KTX libraries
+  api "io.github.libktx:ktx-app:1.13.1-rc1"
+  api "io.github.libktx:ktx-assets:1.13.1-rc1"
+  api "io.github.libktx:ktx-graphics:1.13.1-rc1"
+  api "io.github.libktx:ktx-log:1.13.1-rc1"
+  api "io.github.libktx:ktx-math:1.13.1-rc1"
+
+  // Kotlin stdlib
+  api "org.jetbrains.kotlin:kotlin-stdlib:2.1.0"
+
+  // Kotlinx serialization
+  api "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3"
+
+  if(enableGraalNative == 'true') {
+    implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
+  }
+}
+
+jar {
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+

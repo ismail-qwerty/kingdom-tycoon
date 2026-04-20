@@ -1,0 +1,18 @@
+# Release signing files (NEVER commit these)
+keystore.properties
+*.jks
+*.keystore
+
+# Build outputs
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# ProGuard mapping files
+mapping.txt
+seeds.txt
+usage.txt
+
+# Local configuration
+local.properties

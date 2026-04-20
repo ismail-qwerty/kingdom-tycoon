@@ -1,0 +1,162 @@
+{
+  "com.badlogic.gdx.graphics.Color": {
+    "white": { "r": 1, "g": 1, "b": 1, "a": 1 },
+    "black": { "r": 0, "g": 0, "b": 0, "a": 1 },
+    "gold": { "r": 1, "g": 0.84, "b": 0, "a": 1 },
+    "grey": { "r": 0.5, "g": 0.5, "b": 0.5, "a": 1 },
+    "dark-grey": { "r": 0.2, "g": 0.2, "b": 0.2, "a": 1 },
+    "light-grey": { "r": 0.7, "g": 0.7, "b": 0.7, "a": 1 },
+    "red": { "r": 1, "g": 0.2, "b": 0.2, "a": 1 },
+    "green": { "r": 0.2, "g": 0.8, "b": 0.2, "a": 1 },
+    "orange": { "r": 1, "g": 0.5, "b": 0, "a": 1 },
+    "cyan": { "r": 0, "g": 0.8, "b": 1, "a": 1 },
+    "purple": { "r": 0.6, "g": 0.2, "b": 0.8, "a": 1 },
+    "transparent": { "r": 0, "g": 0, "b": 0, "a": 0 }
+  },
+
+  "com.badlogic.gdx.graphics.g2d.BitmapFont": {
+    "default-font": { "file": "fonts/default.fnt" },
+    "large-font": { "file": "fonts/large.fnt" },
+    "small-font": { "file": "fonts/small.fnt" }
+  },
+
+  "com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle": {
+    "default": {
+      "font": "default-font",
+      "fontColor": "white"
+    },
+    "gold-large": {
+      "font": "large-font",
+      "fontColor": "gold"
+    },
+    "gold-small": {
+      "font": "small-font",
+      "fontColor": "gold"
+    },
+    "body-white": {
+      "font": "default-font",
+      "fontColor": "white"
+    },
+    "body-grey": {
+      "font": "default-font",
+      "fontColor": "light-grey"
+    },
+    "title": {
+      "font": "large-font",
+      "fontColor": "gold"
+    },
+    "combo": {
+      "font": "large-font",
+      "fontColor": "orange"
+    }
+  },
+
+  "com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle": {
+    "default": {
+      "font": "default-font",
+      "fontColor": "white",
+      "downFontColor": "light-grey",
+      "overFontColor": "gold"
+    },
+    "gold-button": {
+      "font": "default-font",
+      "fontColor": "white",
+      "downFontColor": "light-grey",
+      "overFontColor": "gold"
+    },
+    "grey-button": {
+      "font": "default-font",
+      "fontColor": "light-grey",
+      "downFontColor": "grey",
+      "disabledFontColor": "dark-grey"
+    },
+    "tab-button": {
+      "font": "default-font",
+      "fontColor": "light-grey",
+      "downFontColor": "white",
+      "checkedFontColor": "gold"
+    },
+    "prestige-button": {
+      "font": "large-font",
+      "fontColor": "gold",
+      "downFontColor": "white",
+      "overFontColor": "cyan"
+    },
+    "danger-button": {
+      "font": "default-font",
+      "fontColor": "white",
+      "downFontColor": "light-grey",
+      "overFontColor": "red"
+    }
+  },
+
+  "com.badlogic.gdx.scenes.scene2d.ui.TextField$TextFieldStyle": {
+    "default": {
+      "font": "default-font",
+      "fontColor": "white",
+      "focusedFontColor": "gold",
+      "disabledFontColor": "grey"
+    }
+  },
+
+  "com.badlogic.gdx.scenes.scene2d.ui.CheckBox$CheckBoxStyle": {
+    "default": {
+      "font": "default-font",
+      "fontColor": "white"
+    }
+  },
+
+  "com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle": {
+    "default": {
+      "background": "transparent"
+    },
+    "invisible": {
+      "background": "transparent"
+    }
+  },
+
+  "com.badlogic.gdx.scenes.scene2d.ui.SelectBox$SelectBoxStyle": {
+    "default": {
+      "font": "default-font",
+      "fontColor": "white",
+      "scrollStyle": "default",
+      "listStyle": "default"
+    }
+  },
+
+  "com.badlogic.gdx.scenes.scene2d.ui.List$ListStyle": {
+    "default": {
+      "font": "default-font",
+      "fontColorSelected": "gold",
+      "fontColorUnselected": "white"
+    }
+  },
+
+  "com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle": {
+    "default": {
+      "titleFont": "large-font",
+      "titleFontColor": "gold"
+    },
+    "popup": {
+      "titleFont": "default-font",
+      "titleFontColor": "white"
+    }
+  },
+
+  "com.badlogic.gdx.scenes.scene2d.ui.ProgressBar$ProgressBarStyle": {
+    "default-horizontal": {
+      "background": "transparent",
+      "knobBefore": "transparent"
+    },
+    "gold-horizontal": {
+      "background": "transparent",
+      "knobBefore": "transparent"
+    }
+  },
+
+  "com.badlogic.gdx.scenes.scene2d.ui.Slider$SliderStyle": {
+    "default-horizontal": {
+      "background": "transparent"
+    }
+  }
+}
