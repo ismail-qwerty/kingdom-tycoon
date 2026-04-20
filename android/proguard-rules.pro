@@ -1,5 +1,3 @@
-# PATH: android/proguard-rules.pro
-
 # LibGDX specific rules
 -dontwarn com.badlogic.gdx.backends.android.AndroidFragmentApplication
 -dontwarn com.badlogic.gdx.utils.GdxBuild
@@ -21,7 +19,7 @@
     private void writeObject(java.io.ObjectOutputStream);
     private void readObject(java.io.ObjectInputStream);
     java.lang.Object writeReplace();
-    java.lang.Object readResolve();
+    java.lang.Object readReplace();
 }
 
 # Kotlinx Serialization
@@ -44,12 +42,31 @@
     kotlinx.serialization.KSerializer serializer(...);
 }
 
-# Keep Android launcher and all android-package classes (prevents ClassNotFoundException on launch)
+# FIX: Keep android launcher and all android-package classes
 -keep class com.ismail.kingdom.android.** { *; }
+
+# FIX: Keep all screen and UI classes (R8 strips these in release without this)
+-keep class com.ismail.kingdom.screens.** { *; }
+-keep class com.ismail.kingdom.ui.** { *; }
+-keep class com.ismail.kingdom.ScreenNavigator { *; }
+-keep class com.ismail.kingdom.KingdomTycoonGame { *; }
+-keep class com.ismail.kingdom.LoadingScreen { *; }
+-keep class com.ismail.kingdom.MainMenuScreen { *; }
+-keep class com.ismail.kingdom.GameScreen { *; }
+-keep class com.ismail.kingdom.MapScreen { *; }
+-keep class com.ismail.kingdom.EventScreen { *; }
+-keep class com.ismail.kingdom.PrestigeScreen { *; }
+-keep class com.ismail.kingdom.SettingsScreen { *; }
+-keep class com.ismail.kingdom.HallOfLegendsScreen { *; }
+-keep class com.ismail.kingdom.WarScreen { *; }
 
 # Keep game state classes
 -keep class com.ismail.kingdom.models.** { *; }
 -keep class com.ismail.kingdom.data.** { *; }
+
+# FIX: Keep all systems and factories
+-keep class com.ismail.kingdom.systems.** { *; }
+-keep class com.ismail.kingdom.factories.** { *; }
 
 # AdMob
 -keep class com.google.android.gms.ads.** { *; }

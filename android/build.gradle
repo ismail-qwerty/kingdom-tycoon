@@ -1,4 +1,3 @@
-
 buildscript {
   repositories {
     mavenCentral()
@@ -22,7 +21,7 @@ android {
       aidl.setSrcDirs(['src/main/java'])
       renderscript.setSrcDirs(['src/main/java'])
       res.setSrcDirs(['res'])
-      assets.setSrcDirs(['../assets'])
+      assets.setSrcDirs(['assets'])
       jniLibs.setSrcDirs(['libs'])
     }
   }
@@ -152,4 +151,3 @@ tasks.register('run', Exec) {
 }
 
 eclipse.project.name = appName + "-android"
-

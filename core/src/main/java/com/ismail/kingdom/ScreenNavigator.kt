@@ -17,9 +17,9 @@ import java.util.*
 /**
  * NAVIGATION FLOW DOCUMENTATION
  * =============================
- * 
+ *
  * Screen Hierarchy:
- * 
+ *
  * LoadingScreen (initial)
  *   ↓ (auto-transition when assets loaded)
  * MainMenuScreen
@@ -35,19 +35,19 @@ import java.util.*
  *   └→ SettingsScreen (settings icon)
  *       ├→ GameScreen (BACK button)
  *       └→ MainMenuScreen (after reset progress)
- * 
+ *
  * Special Cases:
  * - Any screen can return to MainMenuScreen via reset progress
  * - Android back button handled per screen (see goBack())
  * - GameEngine is SHARED across all screens (singleton pattern)
  * - Screens should NOT create new GameEngine instances
- * 
+ *
  * Screen Lifecycle:
  * 1. show() - called when screen becomes active
  * 2. render(delta) - called every frame
  * 3. hide() - called when screen becomes inactive
  * 4. dispose() - called when screen is removed from memory
- * 
+ *
  * Resource Management:
  * - Each screen must dispose its own resources in dispose()
  * - GameEngine is NOT disposed by screens (managed by KingdomTycoonGame)
@@ -55,7 +55,6 @@ import java.util.*
  * - Shared resources (GameAssets) should NOT be disposed by screens
  */
 
-// Screen types for navigation
 enum class ScreenType {
     LOADING,
     MAIN_MENU,
@@ -66,59 +65,49 @@ enum class ScreenType {
     SETTINGS
 }
 
-// Transition types for screen changes
 enum class TransitionType {
-    FADE,           // 0.3s fade out/in
-    SLIDE_LEFT,     // Slide from right to left
-    SLIDE_RIGHT,    // Slide from left to right
-    FLASH_WHITE,    // White flash (for prestige)
-    NONE            // Instant transition
+    FADE,
+    SLIDE_LEFT,
+    SLIDE_RIGHT,
+    FLASH_WHITE,
+    NONE
 }
 
-// Singleton screen navigator managing screen transitions and back stack
 object ScreenNavigator {
-    
+
     private var game: KingdomTycoonGame? = null
     private val screenStack = Stack<ScreenType>()
-    
-    // Transition overlay stage
+
     private var transitionStage: Stage? = null
     private var isTransitioning = false
-    
-    // Initializes navigator with game instance
+
     fun initialize(game: KingdomTycoonGame) {
         this.game = game
         screenStack.clear()
-        
-        // Create transition stage
         transitionStage = Stage(ScreenViewport())
     }
-    
-    // Navigates to specified screen with transition
+
     fun navigate(screenType: ScreenType, transition: TransitionType = TransitionType.FADE, addToStack: Boolean = true) {
         if (game == null) {
             Gdx.app.error("ScreenNavigator", "Navigator not initialized!")
             return
         }
-        
+
         if (isTransitioning) {
             Gdx.app.log("ScreenNavigator", "Transition already in progress, ignoring")
             return
         }
-        
-        // Add current screen to stack if requested
+
         if (addToStack && screenStack.isNotEmpty()) {
-            // Don't add duplicate
             if (screenStack.peek() != screenType) {
                 screenStack.push(screenType)
             }
         } else if (addToStack) {
             screenStack.push(screenType)
         }
-        
+
         Gdx.app.log("ScreenNavigator", "Navigating to $screenType with $transition transition")
-        
-        // Perform transition
+
         when (transition) {
             TransitionType.FADE -> fadeTransition(screenType)
             TransitionType.SLIDE_LEFT -> slideTransition(screenType, true)
@@ -127,49 +116,33 @@ object ScreenNavigator {
             TransitionType.NONE -> instantTransition(screenType)
         }
     }
-    
-    // Goes back to previous screen in stack
+
     fun goBack(): Boolean {
         if (screenStack.size <= 1) {
             Gdx.app.log("ScreenNavigator", "No screen to go back to")
             return false
         }
-        
-        // Pop current screen
         screenStack.pop()
-        
-        // Get previous screen
         val previousScreen = screenStack.peek()
-        
         Gdx.app.log("ScreenNavigator", "Going back to $previousScreen")
-        
-        // Navigate without adding to stack
         navigate(previousScreen, TransitionType.FADE, addToStack = false)
-        
         return true
     }
-    
-    // Clears screen stack (used for reset)
+
     fun clearStack() {
         screenStack.clear()
         Gdx.app.log("ScreenNavigator", "Screen stack cleared")
     }
-    
-    // Fade transition
+
     private fun fadeTransition(screenType: ScreenType) {
         isTransitioning = true
-        
         val overlay = createOverlay(Color.BLACK)
         overlay.color.a = 0f
-        
         transitionStage?.addActor(overlay)
-        
         overlay.addAction(
             Actions.sequence(
                 Actions.fadeIn(0.15f),
-                Actions.run {
-                    setScreen(screenType)
-                },
+                Actions.run { setScreen(screenType) },
                 Actions.fadeOut(0.15f),
                 Actions.run {
                     overlay.remove()
@@ -178,24 +151,17 @@ object ScreenNavigator {
             )
         )
     }
-    
-    // Slide transition
+
     private fun slideTransition(screenType: ScreenType, slideLeft: Boolean) {
         isTransitioning = true
-        
         val overlay = createOverlay(Color.BLACK)
         val screenWidth = Gdx.graphics.width.toFloat()
-        
         overlay.x = if (slideLeft) screenWidth else -screenWidth
-        
         transitionStage?.addActor(overlay)
-        
         overlay.addAction(
             Actions.sequence(
                 Actions.moveTo(0f, 0f, 0.3f, Interpolation.pow2Out),
-                Actions.run {
-                    setScreen(screenType)
-                },
+                Actions.run { setScreen(screenType) },
                 Actions.moveTo(if (slideLeft) -screenWidth else screenWidth, 0f, 0.3f, Interpolation.pow2In),
                 Actions.run {
                     overlay.remove()
@@ -204,23 +170,17 @@ object ScreenNavigator {
             )
         )
     }
-    
-    // Flash white transition (for prestige)
+
     private fun flashTransition(screenType: ScreenType) {
         isTransitioning = true
-        
         val overlay = createOverlay(Color.WHITE)
         overlay.color.a = 0f
-        
         transitionStage?.addActor(overlay)
-        
         overlay.addAction(
             Actions.sequence(
                 Actions.fadeIn(0.2f),
                 Actions.delay(0.3f),
-                Actions.run {
-                    setScreen(screenType)
-                },
+                Actions.run { setScreen(screenType) },
                 Actions.fadeOut(0.5f),
                 Actions.run {
                     overlay.remove()
@@ -229,21 +189,36 @@ object ScreenNavigator {
             )
         )
     }
-    
-    // Instant transition
+
     private fun instantTransition(screenType: ScreenType) {
         setScreen(screenType)
     }
-    
-    // Sets the screen
+
+    // FIX: Always remove the old screen instance before adding a new one.
+    // KtxGame throws GdxRuntimeException if you addScreen() with a type
+    // that is already registered. removeScreen() disposes and unregisters it.
     private fun setScreen(screenType: ScreenType) {
         val g = game ?: return
         val newScreen = createScreen(screenType) ?: return
-        
-        // Add screen if not already registered
+
+        // Remove existing instance of this screen type to avoid duplicate registration
+        try {
+            when (newScreen) {
+                is LoadingScreen -> g.removeScreen<LoadingScreen>()
+                is MainMenuScreen -> g.removeScreen<MainMenuScreen>()
+                is GameScreen -> g.removeScreen<GameScreen>()
+                is MapScreen -> g.removeScreen<MapScreen>()
+                is EventScreen -> g.removeScreen<EventScreen>()
+                is PrestigeScreen -> g.removeScreen<PrestigeScreen>()
+                is SettingsScreen -> g.removeScreen<SettingsScreen>()
+                else -> {}
+            }
+        } catch (e: Exception) {
+            // Screen wasn't registered yet — safe to ignore
+        }
+
         g.addScreen(newScreen)
-        
-        // Use reflection to call setScreen with proper type
+
         when (newScreen) {
             is LoadingScreen -> g.setScreen<LoadingScreen>()
             is MainMenuScreen -> g.setScreen<MainMenuScreen>()
@@ -255,11 +230,9 @@ object ScreenNavigator {
             else -> Gdx.app.error("ScreenNavigator", "Unknown screen type: ${newScreen::class.simpleName}")
         }
     }
-    
-    // Creates screen instance
+
     private fun createScreen(screenType: ScreenType): KtxScreen? {
         val g = game ?: return null
-        
         return when (screenType) {
             ScreenType.LOADING -> LoadingScreen(g)
             ScreenType.MAIN_MENU -> MainMenuScreen(g)
@@ -267,7 +240,6 @@ object ScreenNavigator {
             ScreenType.MAP -> MapScreen(g)
             ScreenType.EVENT -> EventScreen(g)
             ScreenType.PRESTIGE -> {
-                // Determine prestige layer
                 val layer = g.gameEngine.prestigeSystem.getAvailablePrestigeLayer()
                 if (layer != null) {
                     PrestigeScreen(g, layer)
@@ -279,38 +251,31 @@ object ScreenNavigator {
             ScreenType.SETTINGS -> SettingsScreen(g)
         }
     }
-    
-    // Creates overlay image
+
     private fun createOverlay(color: Color): Image {
         val pixmap = Pixmap(Gdx.graphics.width, Gdx.graphics.height, Pixmap.Format.RGBA8888)
         pixmap.setColor(color)
         pixmap.fill()
         val texture = Texture(pixmap)
         pixmap.dispose()
-        
         return Image(texture)
     }
-    
-    // Updates transition stage
+
     fun update(delta: Float) {
         transitionStage?.act(delta)
     }
-    
-    // Renders transition stage
+
     fun render() {
         transitionStage?.draw()
     }
-    
-    // Disposes navigator resources
+
     fun dispose() {
         transitionStage?.dispose()
         transitionStage = null
     }
-    
-    // Checks if currently transitioning
+
     fun isTransitioning(): Boolean = isTransitioning
-    
-    // Gets current screen type
+
     fun getCurrentScreen(): ScreenType? {
         return if (screenStack.isNotEmpty()) screenStack.peek() else null
     }

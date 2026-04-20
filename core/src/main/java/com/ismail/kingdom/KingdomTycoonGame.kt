@@ -12,7 +12,6 @@ import com.ismail.kingdom.data.SettingsManager
 import ktx.app.KtxGame
 import ktx.app.KtxScreen
 
-// Main game class extending KtxGame for Kotlin-friendly lifecycle management
 class KingdomTycoonGame(val adsManager: AdsInterface? = null) : KtxGame<KtxScreen>() {
 
     lateinit var batch: SpriteBatch
@@ -25,7 +24,6 @@ class KingdomTycoonGame(val adsManager: AdsInterface? = null) : KtxGame<KtxScree
     lateinit var saveManager: SaveManager
         private set
 
-    // Initializes shared resources and loads initial assets
     override fun create() {
         batch = SpriteBatch()
         assets = AssetManager()
@@ -36,19 +34,16 @@ class KingdomTycoonGame(val adsManager: AdsInterface? = null) : KtxGame<KtxScree
 
         val prefs = Gdx.app.getPreferences("kingdom_save")
         saveManager = SaveManager(prefs)
-
         gameEngine = GameEngine(prefs, adsManager)
 
-        // Create and add LoadingScreen directly, then set it
-        val loadingScreen = LoadingScreen(this)
-        addScreen(loadingScreen)
-        setScreen<LoadingScreen>()
-        
-        // Initialize navigator for future transitions
+        // FIX: Initialize navigator FIRST, then navigate via it only.
+        // Never call addScreen() + setScreen() manually alongside ScreenNavigator —
+        // doing so registers a screen instance that the navigator then tries to
+        // replace, causing GdxRuntimeException: "screen already exists".
         ScreenNavigator.initialize(this)
+        ScreenNavigator.navigate(ScreenType.LOADING, TransitionType.NONE)
     }
 
-    // Renders current screen and transitions
     override fun render() {
         super.render()
         saveManager.updateAutoSave(Gdx.graphics.deltaTime, gameEngine.gameState)
@@ -56,7 +51,6 @@ class KingdomTycoonGame(val adsManager: AdsInterface? = null) : KtxGame<KtxScree
         ScreenNavigator.render()
     }
 
-    // Disposes all shared resources
     override fun dispose() {
         batch.dispose()
         assets.dispose()
