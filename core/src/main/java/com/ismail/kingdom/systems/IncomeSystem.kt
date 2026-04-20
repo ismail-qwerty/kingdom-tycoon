@@ -6,6 +6,13 @@ import com.ismail.kingdom.utils.SafeMath
 
 // Manages passive income generation from buildings
 class IncomeSystem(private val gameState: GameState) {
+
+    // Optional event system reference for applying event income multipliers
+    private var eventSystem: EventSystem? = null
+
+    fun setEventSystem(system: EventSystem) {
+        eventSystem = system
+    }
     
     // Updates income and adds gold to game state
     fun update(delta: Float) {
@@ -13,12 +20,10 @@ class IncomeSystem(private val gameState: GameState) {
         
         // Use SafeMath for all additions
         val goldToAdd = SafeMath.safeMultiply(incomePerSecond, delta.toDouble())
-        gameState.currentGold = SafeMath.safeAdd(gameState.currentGold, goldToAdd)
-        gameState.totalLifetimeGold = SafeMath.safeAdd(gameState.totalLifetimeGold, goldToAdd)
-        
-        // Clamp gold to valid range
-        gameState.currentGold = SafeMath.clampGold(gameState.currentGold)
-        gameState.totalLifetimeGold = SafeMath.clampGold(gameState.totalLifetimeGold)
+        gameState.currentGold = SafeMath.clampGold(SafeMath.safeAdd(gameState.currentGold, goldToAdd))
+        gameState.totalLifetimeGold = SafeMath.clampGold(SafeMath.safeAdd(gameState.totalLifetimeGold, goldToAdd))
+        // Also track totalGoldEarned so statistics and prestige checks stay in sync
+        gameState.totalGoldEarned = SafeMath.clampGold(SafeMath.safeAdd(gameState.totalGoldEarned, goldToAdd))
     }
     
     // Calculates total income per second from all sources
@@ -34,8 +39,14 @@ class IncomeSystem(private val gameState: GameState) {
             totalIncome = SafeMath.safeAdd(totalIncome, buildingIncome)
         }
         
-        // Apply income multiplier
+        // Apply base income multiplier from game state
         totalIncome = SafeMath.safeMultiply(totalIncome, gameState.incomeMultiplier)
+
+        // Apply active event income multiplier (e.g. GOBLIN_RAID 3×, DOUBLE_INCOME 2×)
+        val eventMultiplier = eventSystem?.getEventIncomeMultiplier() ?: 1.0
+        if (eventMultiplier != 1.0) {
+            totalIncome = SafeMath.safeMultiply(totalIncome, eventMultiplier)
+        }
         
         return totalIncome
     }

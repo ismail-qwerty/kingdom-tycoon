@@ -58,11 +58,13 @@ class GameEngine(
 
     init {
         tapSystem.setEventSystem(eventSystem)
+        incomeSystem.setEventSystem(eventSystem)
     }
 
     // Rebinds systems to the current GameState
     internal fun rebindStatefulSystems() {
         incomeSystem = IncomeSystem(gameState)
+        incomeSystem.setEventSystem(eventSystem)
         tapSystem = TapSystem(incomeSystem)
         tapSystem.setEventSystem(eventSystem)
         buildingSystem = BuildingSystem(gameState)
@@ -160,13 +162,7 @@ class GameEngine(
                 }
             }
         }
-
-        autosaveAccumulator += delta
-        if (autosaveAccumulator >= AUTOSAVE_INTERVAL) {
-            autosaveAccumulator = 0f
-            syncPersistentState()
-            SaveManager.saveGame(gameState, prefs)
-        }
+        // Note: autosave is handled by SaveManager.updateAutoSave() in KingdomTycoonGame.render()
     }
 
     fun tap(x: Float, y: Float): TapEvent {

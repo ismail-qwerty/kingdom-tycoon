@@ -11,11 +11,12 @@ class AdvisorSystem {
     fun unlockAdvisor(advisorId: String, state: GameState): Boolean {
         val advisor = state.advisors.find { it.id == advisorId } ?: return false
         
-        if (advisor.isUnlocked) return false
+        // Use isHired (not isUnlocked) — isUnlocked defaults to true and means "visible"
+        if (advisor.isHired) return false
         
         if (!state.spendGold(advisor.unlockCost)) return false
         
-        advisor.isUnlocked = true
+        advisor.isHired = true
         
         // Mark building as having advisor
         val building = state.buildings.find { it.id == advisor.buildingId }
@@ -29,10 +30,10 @@ class AdvisorSystem {
         return state.advisors.find { it.buildingId == buildingId }
     }
     
-    // Checks if a building is automated (has unlocked advisor)
+    // Checks if a building is automated (advisor has been hired)
     fun isAutomated(buildingId: String, state: GameState): Boolean {
         val advisor = state.advisors.find { it.buildingId == buildingId }
-        return advisor?.isUnlocked == true
+        return advisor?.isHired == true
     }
     
     // Gets automation status for all buildings
@@ -46,15 +47,15 @@ class AdvisorSystem {
         return status
     }
     
-    // Gets all unlocked advisors
+    // Gets all hired advisors
     fun getUnlockedAdvisors(state: GameState): List<Advisor> {
-        return state.advisors.filter { it.isUnlocked }
+        return state.advisors.filter { it.isHired }
     }
     
-    // Gets all available advisors for purchase (building unlocked, advisor not unlocked)
+    // Gets all available advisors for purchase (building unlocked, advisor not yet hired)
     fun getAvailableAdvisors(state: GameState): List<Advisor> {
         return state.advisors.filter { advisor ->
-            !advisor.isUnlocked && 
+            !advisor.isHired && 
             state.buildings.any { it.id == advisor.buildingId && it.isUnlocked }
         }
     }

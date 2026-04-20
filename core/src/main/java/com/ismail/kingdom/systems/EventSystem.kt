@@ -1,3 +1,4 @@
+// PATH: core/src/main/java/com/ismail/kingdom/systems/EventSystem.kt
 package com.ismail.kingdom.systems
 
 import com.ismail.kingdom.models.GameState
@@ -16,16 +17,24 @@ class EventSystem {
     private val MAX_EVENT_INTERVAL_DAYS = 9
     private val SECONDS_PER_DAY = 86400
 
+    // Sub-second accumulator so delta (≈0.016) is never truncated to 0 by toInt()
+    private var eventSecondsAccumulator: Float = 0f
+
     // Updates event timer and applies/removes bonuses
     fun update(delta: Float, state: GameState) {
         val currentEvt = currentEvent
 
         if (currentEvt != null && currentEvt.isActive) {
-            // Countdown active event
-            currentEvt.remainingSeconds -= delta.toInt()
+            // Accumulate fractional seconds; only decrement whole seconds
+            eventSecondsAccumulator += delta
+            val wholeSeconds = eventSecondsAccumulator.toInt()
+            if (wholeSeconds > 0) {
+                eventSecondsAccumulator -= wholeSeconds
+                currentEvt.remainingSeconds -= wholeSeconds
+            }
 
             if (currentEvt.remainingSeconds <= 0) {
-                // Event ended
+                eventSecondsAccumulator = 0f
                 endEvent(state)
             }
         } else {
